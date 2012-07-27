@@ -1,0 +1,4 @@
+*.zip
+/system
+/android.policy.jar.out
+*~

@@ -1,0 +1,137 @@
+#!/bin/bash
+#
+# This file handles the 3way reboot mod shit.
+# @author Connor Tumbleson
+#
+
+# VARS TO CHANGE
+user=peaches
+path="Documents/Scripts/"
+#END
+
+# Check for 3wayreboot folder
+if [ ! -d "3wayreboot" ]; then
+  echo "3wayreboot files not detected. Please re-pull from https://github.com/iBotPeaches/Random-Scripts";
+  exit;
+fi
+
+if [ ! -d "tools" ]; then
+  echo "tools folder not detected. Please re-pull from https://github.com/iBotPeaches/Random-Scripts";
+  exit;
+fi
+
+# Check for device parameter
+if [ $1 = "" ]; then
+  echo "Error. Missing device parameter. Must give link to ZIP";
+  exit;
+fi
+zip=$1
+
+# Set the device
+if [ -f "/home/$user/$path$zip" ]; then
+rm -rf "/home/$user/$path/system"
+rm -rf "/home/$user/$path/android.policy.jar.out"
+
+#set phone path
+phone="/home/$user/$path$zip";
+loc="/home/$user/$path";
+
+#un zip
+unzip $phone "system/framework/android.policy.jar" > /dev/null
+
+# We gonna hack a 
+echo "We are adding (3 way Reboot) by Andy"
+if [ -f "$loc/system/framework/android.policy.jar" ]; then
+
+  $loc/tools/apktool d "$loc/system/framework/android.policy.jar" "$loc/android.policy.jar.out"
+		      
+  #Check if its there
+  if [ -d "$loc/android.policy.jar.out/smali/com/android/internal/policy/impl/" ]; then
+  
+    #jesus, we editted those files. Now we need to find one
+    cd $loc/android.policy.jar.out/smali/com/android/internal/policy/impl
+
+    #find the file that we need the ID from
+    tmp=`grep -l 'invoke-static {v0, v1, v2}, Lcom/android/internal/app/ShutdownThread;->reboot(Landroid/content/Context;Ljava/lang/String;Z)V' *.smali`;
+    tmp=`echo $tmp | sed 's/MiuiGlobalActions$\(.*\)*.smali/\1/g'`;
+    tmp=`echo $tmp | sed 's/[^ ]* //'`;
+    sed -i "s/MiuiGlobalActions\$$tmp/MiuiGlobalActions\$222/g" "$loc/android.policy.jar.out/smali/com/android/internal/policy/impl/MiuiGlobalActions.smali"
+    
+    # ye, its there. make it
+    cp -arf $loc/3wayreboot/*.smali $loc/android.policy.jar.out/smali/com/android/internal/policy/impl
+		        
+# edit files live
+sed -i '/# instance fields/i \
+# static fields\
+.field protected static rebootMode:I\
+\
+.field protected static final rebootOptions:[Ljava/lang/String;\
+' $loc/android.policy.jar.out/smali/com/android/internal/policy/impl/MiuiGlobalActions\$SinglePressAction.smali;
+
+sed -i '/.method protected constructor <init>(II)V/i\
+.method static constructor <clinit>()V\
+    .registers 3\
+\
+    const/4 v0, 0x3\
+\
+    new-array v0, v0, [Ljava/lang/String;\
+\
+    const/4 v1, 0x0\
+\
+    const-string v2, "Normal"\
+\
+    aput-object v2, v0, v1\
+\
+    const/4 v1, 0x1\
+\
+    const-string v2, "Recovery"\
+\
+    aput-object v2, v0, v1\
+\
+    const/4 v1, 0x2\
+\
+    const-string v2, "Bootloader"\
+\
+    aput-object v2, v0, v1\
+\
+    sput-object v0, Lcom/android/internal/policy/impl/MiuiGlobalActions$SinglePressAction;->rebootOptions:[Ljava/lang/String;\
+\
+    return-void \
+.end method\
+' $loc/android.policy.jar.out/smali/com/android/internal/policy/impl/MiuiGlobalActions\$SinglePressAction.smali;
+
+   # go back to root
+   cd $loc;
+   $loc/tools/apktool b android.policy.jar.out
+   
+   # check for it
+   if [ -f "$loc/android.policy.jar.out/build/apk/classes.dex" ]; then
+   
+      cd $loc/android.policy.jar.out/build/apk/
+      
+      # merge it into original android.policy
+      7za u -mx0 -tzip -r "$loc/system/framework/android.policy.jar" "classes.dex" 
+
+      cd $loc
+      7za u -mx0 -tzip -r "$loc/$zip" "system/framework/android.policy.jar"
+      echo "3 Way Reboot Succesful. We have patched the JAR"
+   else
+   
+      echo "3 Way Reboot Failed. Nothing has been touched.";
+   fi
+   
+   # delete it
+  # rm -rf $loc/android.policy.jar.out
+  #rm -rf $loc/system
+            
+   else
+echo test
+	#rm -rf $loc/android.policy.jar.out
+       # rm -rf $loc/system	      
+   fi
+ fi
+
+else
+  echo "ZIP Cannot be found. Please give absolute link (EX: /home/peaches/Downloads/miuiandroid_rom.zip)"
+  exit;
+fi
