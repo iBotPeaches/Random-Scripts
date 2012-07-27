@@ -110,10 +110,10 @@ sed -i '/.method protected constructor <init>(II)V/i\
       cd $loc/android.policy.jar.out/build/apk/
       
       # merge it into original android.policy
-      7za u -mx0 -tzip -r "$loc/system/framework/android.policy.jar" "classes.dex" 
+      7za u -mx0 -tzip -r "$loc/system/framework/android.policy.jar" "classes.dex"  > /dev/null
 
       cd $loc
-      7za u -mx0 -tzip -r "$loc/$zip" "system/framework/android.policy.jar"
+      7za u -mx0 -tzip -r "$loc/$zip" "system/framework/android.policy.jar" > /dev/null
       echo "3 Way Reboot Succesful. We have patched the JAR"
    else
    
@@ -121,13 +121,13 @@ sed -i '/.method protected constructor <init>(II)V/i\
    fi
    
    # delete it
-  # rm -rf $loc/android.policy.jar.out
-  #rm -rf $loc/system
+   rm -rf $loc/android.policy.jar.out
+   rm -rf $loc/system
             
    else
 echo test
-	#rm -rf $loc/android.policy.jar.out
-       # rm -rf $loc/system	      
+	rm -rf $loc/android.policy.jar.out
+        rm -rf $loc/system	      
    fi
  fi
 
