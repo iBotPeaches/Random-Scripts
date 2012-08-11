@@ -21,7 +21,7 @@ if [ ! -d "tools" ]; then
 fi
 
 # Check for device parameter
-if [ $1 = "" ]; then
+if [ "$1" == "" ]; then
   echo "Error. Missing device parameter. Must give link to ZIP";
   exit;
 fi
