@@ -5,8 +5,7 @@
 #
 
 # VARS TO CHANGE
-user=peaches
-path="Documents/Scripts/"
+path=$PWD
 #END
 
 # Check for 3wayreboot folder
@@ -28,14 +27,14 @@ fi
 zip=$1
 
 # Set the device
-if [ -f "/home/$user/$path$zip" ]; then
-rm -rf "/home/$user/$path/system"
-rm -rf "/home/$user/$path/android.policy.jar.out"
+if [ -f "$path/$zip" ]; then
+rm -rf "$path/system"
+rm -rf "$path/android.policy.jar.out"
 
 #set phone and bin path
-phone="/home/$user/$path$zip";
-loc="/home/$user/$path";
-PATH=$PATH:/home/$user/$path/bin
+phone="$path/$zip";
+loc="$path";
+PATH=$PATH:$path/bin
 
 #un zip
 unzip $phone "system/framework/android.policy.jar" > /dev/null
