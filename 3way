@@ -32,9 +32,10 @@ if [ -f "/home/$user/$path$zip" ]; then
 rm -rf "/home/$user/$path/system"
 rm -rf "/home/$user/$path/android.policy.jar.out"
 
-#set phone path
+#set phone and bin path
 phone="/home/$user/$path$zip";
 loc="/home/$user/$path";
+PATH=$PATH:/home/$user/$path/bin
 
 #un zip
 unzip $phone "system/framework/android.policy.jar" > /dev/null
